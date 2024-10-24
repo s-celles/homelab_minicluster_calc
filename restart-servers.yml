@@ -1,0 +1,21 @@
+---
+- name: Redémarrage des machines de calcul distribué
+  hosts: calcul_distribue
+  become: true
+  
+  tasks:
+    - name: Redémarrer les machines
+      reboot:
+        # Délai avant redémarrage
+        pre_reboot_delay: 5
+        # Délai max d'attente du redémarrage
+        reboot_timeout: 300
+        # Message dans les logs système
+        msg: "Redémarrage déclenché par Ansible"
+        # Délai après redémarrage pour vérifier la connexion
+        post_reboot_delay: 30
+        # Test de connexion
+        test_command: whoami
+        
+    - name: Vérifier que les machines sont bien revenues
+      ping:

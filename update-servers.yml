@@ -1,0 +1,50 @@
+---
+# Description : Playbook pour la mise à jour des systèmes Ubuntu/Debian
+# Ce playbook effectue :
+# - La mise à jour du cache des paquets (apt update)
+# - La mise à jour des paquets installés (apt upgrade)
+
+- name: "Mise à jour des systèmes"
+  # Décommenter une des lignes suivantes selon les besoins :
+  #hosts: all           # Pour tous les hôtes de l'inventaire
+  #hosts: vm_servers   # Pour les machines virtuelles uniquement
+  #hosts: lxc_servers  # Pour les conteneurs LXC uniquement
+  hosts: calcul_distribue   # Dans notre cas, uniquement les conteneurs LXC servant de worker pour le calcul distribué
+  
+  # Élévation des privilèges (nécessaire pour apt)
+  become: true
+  
+  # Variables pour le contrôle des mises à jour
+  vars:
+    # Durée de validité du cache en secondes (86400 = 24 heures)
+    # cache_valid_time: 0
+    cache_valid_time: 86400
+    
+  tasks:
+    - name: "Mise à jour du cache des paquets"
+      apt:
+        update_cache: yes
+        cache_valid_time: "{{ cache_valid_time }}"
+      register: apt_update_result
+      
+    - name: "Mise à jour des paquets"
+      apt:
+        upgrade: yes
+      register: apt_upgrade_result
+      
+    # Optionnel : Affichage des résultats
+    - name: "Affichage des paquets mis à jour"
+      debug:
+        var: apt_upgrade_result
+      when: apt_upgrade_result.changed
+
+    # Optionnel : Redémarrage si nécessaire
+    - name: "Vérification si un redémarrage est nécessaire"
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: "Notification si un redémarrage est nécessaire"
+      debug:
+        msg: "Un redémarrage du système est recommandé"
+      when: reboot_required.stat.exists

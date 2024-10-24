@@ -1,0 +1,41 @@
+---
+# Description : Playbook pour l'arrêt contrôlé des conteneurs LXC
+# Ce playbook effectue :
+# - La vérification de l'état des conteneurs
+# - L'arrêt progressif des services
+# - L'arrêt propre des conteneurs
+# - La vérification de l'état final
+
+- name: "Arrêt contrôlé des conteneurs"
+  hosts: calcul_distribue
+  become: true
+  
+  tasks:
+    - name: "Vérification de l'état initial des conteneurs"
+      command: systemctl status
+      register: container_status
+      ignore_errors: true
+      
+    - name: "Arrêt gracieux des services en cours"
+      systemd:
+        state: stopped
+        daemon_reload: yes
+      ignore_errors: true
+      
+    - name: "Attente avant arrêt complet (permettre la sauvegarde des données)"
+      wait_for:
+        timeout: 30
+        
+    - name: "Arrêt des conteneurs"
+      command: poweroff
+      async: 0
+      poll: 0
+      ignore_errors: true
+      
+    - name: "Vérification de l'arrêt effectif"
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 22
+        state: stopped
+        timeout: 300
+      delegate_to: localhost

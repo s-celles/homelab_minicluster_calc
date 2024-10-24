@@ -1,0 +1,60 @@
+---
+# Description : Playbook pour la mise à jour et le redémarrage des systèmes
+# Ce playbook effectue :
+# - La mise à jour du cache et des paquets
+# - Le redémarrage des serveurs si nécessaire
+# - La vérification que les serveurs sont bien revenus en ligne
+
+- name: "Mise à jour et redémarrage des systèmes"
+  hosts: lxc_servers
+  become: true
+  
+  tasks:
+    - name: "Mise à jour du cache des paquets"
+      apt:
+        update_cache: yes
+        cache_valid_time: 86400
+
+    - name: "Mise à jour des paquets"
+      apt:
+        upgrade: yes
+      register: apt_upgrade_result
+
+    # Méthode 1 : Redémarrage immédiat
+    - name: "Redémarrage des serveurs"
+      reboot:
+        # Délai avant de redémarrer (en secondes)
+        pre_reboot_delay: 5
+        # Délai maximum d'attente du redémarrage
+        reboot_timeout: 600
+        # Message dans les logs système
+        msg: "Redémarrage déclenché par Ansible"
+        # Durée d'attente après le redémarrage
+        post_reboot_delay: 10
+        
+    # Méthode 2 : Redémarrage conditionnel (si nécessaire)
+    # - name: "Vérification si redémarrage nécessaire"
+    #   stat:
+    #     path: /var/run/reboot-required
+    #   register: reboot_required
+    #
+    # - name: "Redémarrage si nécessaire"
+    #   reboot:
+    #     msg: "Redémarrage requis après mises à jour"
+    #     pre_reboot_delay: 5
+    #     reboot_timeout: 600
+    #     post_reboot_delay: 10
+    #   when: reboot_required.stat.exists
+
+    - name: "Vérification que le système est opérationnel"
+      wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    - name: "Affichage de l'uptime après redémarrage"
+      shell: uptime
+      register: uptime_result
+
+    - name: "Affichage du résultat"
+      debug:
+        var: uptime_result.stdout_lines

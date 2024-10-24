@@ -1,0 +1,117 @@
+{
+  "container_count": {
+    "sensitive": false,
+    "type": "number",
+    "value": 5
+  },
+  "container_details": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "ubuntu-lxc-1": [
+          "object",
+          {
+            "cores": "number",
+            "id": "number",
+            "ip_address": "string",
+            "memory": "number"
+          }
+        ],
+        "ubuntu-lxc-2": [
+          "object",
+          {
+            "cores": "number",
+            "id": "number",
+            "ip_address": "string",
+            "memory": "number"
+          }
+        ],
+        "ubuntu-lxc-3": [
+          "object",
+          {
+            "cores": "number",
+            "id": "number",
+            "ip_address": "string",
+            "memory": "number"
+          }
+        ],
+        "ubuntu-lxc-4": [
+          "object",
+          {
+            "cores": "number",
+            "id": "number",
+            "ip_address": "string",
+            "memory": "number"
+          }
+        ],
+        "ubuntu-lxc-5": [
+          "object",
+          {
+            "cores": "number",
+            "id": "number",
+            "ip_address": "string",
+            "memory": "number"
+          }
+        ]
+      }
+    ],
+    "value": {
+      "ubuntu-lxc-1": {
+        "cores": 2,
+        "id": 241201,
+        "ip_address": "192.168.1.201",
+        "memory": 2048
+      },
+      "ubuntu-lxc-2": {
+        "cores": 2,
+        "id": 241202,
+        "ip_address": "192.168.1.202",
+        "memory": 2048
+      },
+      "ubuntu-lxc-3": {
+        "cores": 2,
+        "id": 241203,
+        "ip_address": "192.168.1.203",
+        "memory": 2048
+      },
+      "ubuntu-lxc-4": {
+        "cores": 2,
+        "id": 241204,
+        "ip_address": "192.168.1.204",
+        "memory": 2048
+      },
+      "ubuntu-lxc-5": {
+        "cores": 2,
+        "id": 241205,
+        "ip_address": "192.168.1.205",
+        "memory": 2048
+      }
+    }
+  },
+  "container_ips": {
+    "sensitive": false,
+    "type": [
+      "tuple",
+      [
+        "string",
+        "string",
+        "string",
+        "string",
+        "string"
+      ]
+    ],
+    "value": [
+      "192.168.1.201",
+      "192.168.1.202",
+      "192.168.1.203",
+      "192.168.1.204",
+      "192.168.1.205"
+    ]
+  },
+  "sensitive_info": {
+    "sensitive": true,
+    "type": "string",
+    "value": "information_sensible"
+  }
+}

@@ -1,0 +1,75 @@
+---
+  - name: Installer Julia
+    hosts: calcul_distribue
+    vars:
+      julia_version: "latest"  # Utilisez "latest" pour la dernière version ou spécifiez une version comme "1.9.0"
+  
+    tasks:
+      - name: Télécharger le script d'installation de JuliaUp
+        get_url:
+          url: https://install.julialang.org
+          dest: /tmp/julia-installer.sh
+          mode: '0755'
+  
+      - name: Installer JuliaUp
+        shell: /tmp/julia-installer.sh -y
+        args:
+          creates: "{{ ansible_env.HOME }}/.juliaup/bin/juliaup"
+  
+      - name: Vérifier l'existence du fichier .bashrc
+        stat:
+          path: "{{ ansible_env.HOME }}/.bashrc"
+        register: bashrc_file
+  
+      - name: Créer le fichier .bashrc s'il n'existe pas
+        file:
+          path: "{{ ansible_env.HOME }}/.bashrc"
+          state: touch
+          mode: '0644'
+        when: not bashrc_file.stat.exists
+  
+      - name: Ajouter Julia au PATH dans .bashrc
+        lineinfile:
+          path: "{{ ansible_env.HOME }}/.bashrc"
+          line: 'export PATH="{{ ansible_env.HOME }}/.juliaup/bin:$PATH"'
+          state: present
+  
+      - name: Installer la version spécifiée de Julia
+        shell: |
+          export PATH="{{ ansible_env.HOME }}/.juliaup/bin:$PATH"
+          juliaup add {{ julia_version }}
+        args:
+          executable: /bin/bash
+        when: julia_version != "latest"
+  
+      - name: Définir la version par défaut de Julia
+        shell: |
+          export PATH="{{ ansible_env.HOME }}/.juliaup/bin:$PATH"
+          juliaup default {{ julia_version }}
+        args:
+          executable: /bin/bash
+        when: julia_version != "latest"
+  
+      - name: Mettre à jour Julia vers la dernière version stable
+        shell: |
+          export PATH="{{ ansible_env.HOME }}/.juliaup/bin:$PATH"
+          juliaup update
+        args:
+          executable: /bin/bash
+        when: julia_version == "latest"
+  
+      - name: Nettoyer le script d'installation
+        file:
+          path: /tmp/julia-installer.sh
+          state: absent
+  
+      - name: Vérifier l'installation de Julia
+        shell: |
+          export PATH="{{ ansible_env.HOME }}/.juliaup/bin:$PATH"
+          julia --version
+        register: julia_version_output
+        changed_when: false
+  
+      - name: Afficher la version de Julia installée
+        debug:
+          var: julia_version_output.stdout_lines
